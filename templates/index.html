@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/x-icon" href="./images/MYLOGO.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LabChat</title>
+    <style>
+        /* General body styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: rgb(0,0,50);
+            background: linear-gradient(90deg, rgba(0,0,50,1) 19%, rgba(3,3,71,1) 49%, rgba(3,3,71,1) 100%);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            justify-content: flex-start;
+            align-items: center;
+            color: #fff;
+        }
+
+        /* Heading style */
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+            padding: 10px;
+            font-size: 32px;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Chat container */
+        #chat-container {
+            flex-grow: 1;
+            width: 100%;
+            max-width: 900px;
+            padding: 20px;
+            margin-bottom: 70px;
+            background: #010126;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            height: auto; /* Let the height adjust according to content */
+        }
+
+        /* Message styles */
+        .message {
+            margin: 10px 0;
+            padding: 12px;
+            border-radius: 10px;
+            word-wrap: break-word; /* Ensure text wraps within the div */
+        }
+
+        .user-message {
+            background-color: #3b5a7d; /* Darker blue for user messages */
+            color: #fff;
+            text-align: right;
+            margin-left: auto;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: max-content; 
+        }
+
+        .bot-message {
+            background-color: #0e0e82;
+            color: #fff;
+            text-align: left;
+            margin-right: auto;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: auto; /* Adjust width based on content */
+            max-width: 80%; /* Optional: Limit width to prevent overflow */
+        }
+
+        /* Input container */
+        #input-container {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 900px;
+            padding: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Input field styles */
+        input[type="text"] {
+            flex-grow: 1;
+            padding: 14px;
+            font-size: 18px;
+            border-radius: 20px;
+            border: 2px solid #3b5a7d; /* Dark blue border */
+            background-color: #f0f0f0;
+            color: #333;
+            margin-right: 10px;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            border-color: #2a5298; /* Darker shade on focus */
+            background-color: #fff;
+        }
+
+        /* Send button styles */
+        button {
+            padding: 12px 20px;
+            font-size: 18px;
+            background-color: #1e3c72; /* Darker blue for button */
+            color: #fff;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0e2c47; /* Darker hover effect */
+        }
+
+        /* For better usability on mobile */
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 26px;
+            }
+
+            #input-container {
+                width: 95%;
+            }
+
+            input[type="text"] {
+                font-size: 16px;
+            }
+
+            button {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>LabChat</h1>
+
+    <div id="chat-container"></div>
+
+    <div id="input-container">
+        <input type="text" id="user-input" placeholder="Ask a question..." autofocus>
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+    <script>
+        window.onload = function() {
+            addMessage("Hello, young scientist! 🌟 I'm a Lab. Ask me anything about science, I will explain it clearly.", "bot");
+        };
+        
+
+        // Function to handle user input and bot responses
+        document.getElementById('user-input').addEventListener('keypress', function (event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        function sendMessage() {
+            var userInput = document.getElementById('user-input').value;
+            if (userInput.trim() === "") return; // Don't send empty input
+
+            // Display user's message
+            addMessage(userInput, "user");
+
+            // Send the user input to the backend for a response
+            fetch('/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'user_input=' + encodeURIComponent(userInput)
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Display model's response
+                addMessage(data.model_response, "bot");
+            });
+
+            // Clear the input field
+            document.getElementById('user-input').value = '';
+        }
+
+        function addMessage(message, role) {
+            var messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', role + '-message');
+            messageDiv.innerText = message;
+            document.getElementById('chat-container').appendChild(messageDiv);
+            document.getElementById('chat-container').scrollTop = document.getElementById('chat-container').scrollHeight;
+        }
+    </script>
+
+</body>
+</html>
