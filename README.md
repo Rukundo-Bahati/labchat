@@ -1,1 +1,1 @@
-An AI for teaching kids sciences 
+AI for kids with problems related to sciences 
